@@ -4,6 +4,7 @@ import { SectionLabel } from '@/components/ui/Card'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingScreen } from '@/components/ui/Spinner'
 import { Meter } from '@/components/ui/Meter'
+import { AREA_ICONS, type ConceptArea } from '@/components/Icons'
 import { api } from '@/lib/api'
 import { formatRatio } from '@/lib/format'
 
@@ -55,15 +56,20 @@ export function ProgressDashboard() {
       <section className="space-y-3">
         <SectionLabel>Strength by area</SectionLabel>
         <div className="space-y-2.5 rounded-lg border border-line bg-surface px-5 py-5">
-          {data.areas.map((area) => (
-            <Meter
-              key={area.area}
-              label={area.title}
-              value={area.strength}
-              detail={`${area.practicedCount}/${area.conceptCount} practised`}
-              tone={area.strength >= 0.7 ? 'good' : area.strength >= 0.35 ? 'accent' : 'warn'}
-            />
-          ))}
+          {data.areas.map((area) => {
+            const AreaIcon = AREA_ICONS[area.area as ConceptArea] ?? AREA_ICONS.traffic
+            return (
+              <div key={area.area} className="flex items-center gap-2.5">
+                <AreaIcon className="h-4 w-4 shrink-0 text-ink-faint" />
+                <Meter
+                  label={area.title}
+                  value={area.strength}
+                  detail={`${area.practicedCount}/${area.conceptCount} practised`}
+                  tone={area.strength >= 0.7 ? 'good' : area.strength >= 0.35 ? 'accent' : 'warn'}
+                />
+              </div>
+            )
+          })}
         </div>
       </section>
 

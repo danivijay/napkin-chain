@@ -1,12 +1,18 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { Wordmark } from '@/components/Logo'
+import {
+  ChallengesIcon,
+  HomeIcon,
+  LearnIcon,
+  ProgressIcon,
+} from '@/components/Icons'
 import { useAuth } from '@/hooks/useAuth'
 
 const NAV = [
-  { to: '/app', label: 'Home', end: true },
-  { to: '/app/challenges', label: 'Challenges', end: false },
-  { to: '/app/learn', label: 'Learn', end: false },
-  { to: '/app/progress', label: 'Progress', end: false },
+  { to: '/app', label: 'Home', end: true, Icon: HomeIcon },
+  { to: '/app/challenges', label: 'Challenges', end: false, Icon: ChallengesIcon },
+  { to: '/app/learn', label: 'Learn', end: false, Icon: LearnIcon },
+  { to: '/app/progress', label: 'Progress', end: false, Icon: ProgressIcon },
 ]
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -28,9 +34,12 @@ export function AppLayout() {
           </NavLink>
 
           <nav className="hidden items-center gap-6 sm:flex">
-            {NAV.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end} className={navClass}>
-                {item.label}
+            {NAV.map(({ to, label, end, Icon }) => (
+              <NavLink key={to} to={to} end={end} className={navClass}>
+                <span className="flex items-center gap-1.5">
+                  <Icon className="h-[17px] w-[17px]" />
+                  {label}
+                </span>
               </NavLink>
             ))}
           </nav>
@@ -55,18 +64,19 @@ export function AppLayout() {
 
       {/* Mobile: navigation lives at the thumb, not the top. */}
       <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-line bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden">
-        {NAV.map((item) => (
+        {NAV.map(({ to, label, end, Icon }) => (
           <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
+            key={to}
+            to={to}
+            end={end}
             className={({ isActive }) =>
-              `py-3 text-center text-[12px] ${
+              `flex flex-col items-center gap-1 py-2.5 text-[11px] ${
                 isActive ? 'font-medium text-ink' : 'text-ink-muted'
               }`
             }
           >
-            {item.label}
+            <Icon className="h-[19px] w-[19px]" />
+            {label}
           </NavLink>
         ))}
       </nav>

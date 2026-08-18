@@ -56,6 +56,24 @@ export function ChallengeLibrary() {
   )
 }
 
+/** The shape of the chain, so the card shows a chain rather than describing one. */
+function ChainPreview({ labels }: { labels: string[] }) {
+  const shown = labels.slice(0, 3)
+  const remaining = labels.length - shown.length
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 font-mono text-[11px] text-ink-muted">
+      {shown.map((label, index) => (
+        <span key={label} className="flex items-center gap-1.5">
+          <span>{label}</span>
+          {index < shown.length - 1 && <span className="text-ink-faint">→</span>}
+        </span>
+      ))}
+      {remaining > 0 && <span className="text-ink-faint">→ +{remaining} more</span>}
+    </div>
+  )
+}
+
 function ChallengeCard({ challenge }: { challenge: ChallengeSummary }) {
   const inProgress = challenge.attemptStatus === 'in_progress'
   const completed = challenge.attemptStatus === 'completed'
@@ -78,7 +96,10 @@ function ChallengeCard({ challenge }: { challenge: ChallengeSummary }) {
         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-secondary">
           {challenge.description}
         </p>
-        <p className="mt-3 text-xs text-ink-muted">
+
+        <ChainPreview labels={challenge.chainLabels} />
+
+        <p className="mt-auto pt-3 text-xs text-ink-muted">
           {challenge.nodeCount} estimates · ~{challenge.estimatedMinutes} min
         </p>
       </Link>

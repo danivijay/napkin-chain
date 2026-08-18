@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { SectionLabel } from '@/components/ui/Card'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingScreen } from '@/components/ui/Spinner'
+import { AREA_ICONS, type ConceptArea } from '@/components/Icons'
 import { api } from '@/lib/api'
 import type { ConceptSummary } from '@/types'
 
@@ -32,16 +33,22 @@ export function LearnLibrary() {
         </p>
       </header>
 
-      {data.map((group) => (
+      {data.map((group) => {
+        const AreaIcon = AREA_ICONS[group.area as ConceptArea] ?? AREA_ICONS.traffic
+        return (
         <section key={group.area} className="space-y-3">
-          <SectionLabel>{group.title}</SectionLabel>
+          <div className="flex items-center gap-2 text-ink-muted">
+            <AreaIcon className="h-[17px] w-[17px]" />
+            <SectionLabel>{group.title}</SectionLabel>
+          </div>
           <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
             {group.concepts.map((concept) => (
               <ConceptRow key={concept.conceptId} concept={concept} />
             ))}
           </ul>
         </section>
-      ))}
+        )
+      })}
     </div>
   )
 }

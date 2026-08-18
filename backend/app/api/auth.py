@@ -88,20 +88,32 @@ async def google_callback(
     error: str | None = None,
 ):
     landing = request.cookies.get("nc_post_login", "/app")
-    failure = RedirectResponse(f"{settings.frontend_url}/login?error=auth_failed")
 
-    if error or not code:
+    def failed(reason: str) -> RedirectResponse:
+        # A coarse reason, so a failure is diagnosable from the URL alone.
+        # It says which stage broke, never why - the detail stays in the logs.
+        return RedirectResponse(f"{settings.frontend_url}/login?error={reason}")
+
+    if error:
         logger.warning("auth.callback_error", extra={"error": error})
-        return failure
+        # access_denied is the user declining, or an unpublished consent screen
+        # refusing someone who is not a test user.
+        return failed("auth_denied" if error == "access_denied" else "auth_failed")
+    if not code:
+        logger.warning("auth.callback_no_code")
+        return failed("auth_failed")
     if not oauth_state_valid(request, state):
-        logger.warning("auth.state_mismatch")
-        return failure
+        logger.warning(
+            "auth.state_mismatch",
+            extra={"hasCookie": OAUTH_STATE_COOKIE in request.cookies},
+        )
+        return failed("auth_state")
 
     try:
         identity = await auth_service.exchange_code_for_identity(code)
     except AuthError as exc:
         logger.warning("auth.exchange_failed", extra={"error": str(exc)})
-        return failure
+        return failed("auth_exchange")
 
     response = RedirectResponse(f"{settings.frontend_url}{landing}")
     await _sign_in(response, identity)

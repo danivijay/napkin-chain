@@ -8,6 +8,9 @@ import { useAuth, useDevLogin } from '@/hooks/useAuth'
 
 const ERRORS: Record<string, string> = {
   auth_failed: "That sign-in didn't complete. Try again.",
+  auth_denied: 'Google declined that sign-in. If this app is still unpublished, your address has to be added as a test user.',
+  auth_state: 'That sign-in took too long, or cookies were blocked. Try again.',
+  auth_exchange: "We couldn't confirm that account with Google.",
   google_not_configured: 'Google sign-in is not configured on this server.',
 }
 

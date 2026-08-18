@@ -9,7 +9,8 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
-    region: oregon
+    # Closest region to the author and early users, who are on IST.
+    region: singapore
     healthCheckPath: /health
 
     envVars:

@@ -10,6 +10,12 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // Mirrors production, where FastAPI serves the SPA and the API together.
+    // Keeping dev same-origin too means cookies behave identically in both.
+    proxy: {
+      '/api': { target: 'http://localhost:8000', changeOrigin: true },
+      '/health': { target: 'http://localhost:8000', changeOrigin: true },
+    },
   },
   test: {
     environment: 'jsdom',

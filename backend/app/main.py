@@ -7,11 +7,13 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api import attempts, auth, challenges, learning, progress, users
+from app.api.spa import mount_frontend
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
 from app.core.security import CSRF_HEADER
 from app.db import mongodb
 from app.db.indexes import ensure_indexes
+from app.seed.run import seed
 
 configure_logging()
 logger = get_logger(__name__)
@@ -24,6 +26,15 @@ async def lifespan(app: FastAPI):
         await ensure_indexes()
     except Exception as exc:  # noqa: BLE001 - the API can still serve reads
         logger.error("startup.index_failure", extra={"error": str(exc)})
+
+    # Content is seeded on boot rather than by hand: it is idempotent, and
+    # free-tier instances have no shell to run a one-off command from.
+    try:
+        counts = await seed()
+        logger.info("startup.seeded", extra=counts)
+    except Exception as exc:  # noqa: BLE001 - never block boot on content
+        logger.error("startup.seed_failure", extra={"error": str(exc)})
+
     yield
     await mongodb.disconnect()
 
@@ -36,13 +47,14 @@ app = FastAPI(
     redoc_url=None,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", CSRF_HEADER],
-)
+if not settings.same_origin:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", CSRF_HEADER],
+    )
 
 for router in (
     auth.router,
@@ -90,3 +102,7 @@ async def health() -> dict[str, str]:
 async def health_db() -> dict[str, str]:
     """Reported separately so a cold database never fails the liveness probe."""
     return await mongodb.ping()
+
+
+if settings.serve_frontend:
+    mount_frontend(app)

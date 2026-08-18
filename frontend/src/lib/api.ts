@@ -16,7 +16,13 @@ import type {
   Skills,
 } from '@/types'
 
-const BASE = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000').replace(/\/$/, '')
+/**
+ * Empty by default: requests are relative, so the API is whatever origin
+ * served the page. In production FastAPI serves both; in dev Vite proxies
+ * /api through to the backend. Set VITE_API_BASE_URL only for a genuinely
+ * split deployment.
+ */
+const BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
 /** Thrown for any non-2xx response. `detail` is already user-safe. */
 export class ApiError extends Error {

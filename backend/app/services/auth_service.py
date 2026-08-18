@@ -6,14 +6,13 @@ HttpOnly session cookie. Google's access token is discarded once the identity
 is verified - nothing in the product needs it.
 """
 
-import asyncio
+import time
 from urllib.parse import urlencode
 
 import httpx
 import jwt
 from bson import ObjectId
 from bson.errors import InvalidId
-from jwt import PyJWKClient
 
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -28,11 +27,21 @@ GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 GOOGLE_JWKS_URI = "https://www.googleapis.com/oauth2/v3/certs"
 GOOGLE_ISSUERS = ("https://accounts.google.com", "accounts.google.com")
 
-_jwk_client = PyJWKClient(GOOGLE_JWKS_URI, cache_keys=True)
+#: Google's signing keys, fetched over httpx rather than PyJWKClient's
+#: urllib. urllib trusts the *system* CA store, which a slim container image
+#: may not populate, while httpx uses certifi - the same path the token
+#: exchange above already proves works.
+_jwks_cache: tuple[float, jwt.PyJWKSet] | None = None
+_JWKS_TTL_SECONDS = 3600
 
 
 class AuthError(Exception):
     """Sign-in failed. The message is for logs, never for the browser."""
+
+
+def _invalidate_signing_keys() -> None:
+    global _jwks_cache
+    _jwks_cache = None
 
 
 def build_authorization_url(state: str) -> str:
@@ -69,12 +78,40 @@ async def exchange_code_for_identity(code: str) -> GoogleIdentity:
     return await verify_id_token(id_token)
 
 
+async def _signing_keys() -> jwt.PyJWKSet:
+    global _jwks_cache
+    now = time.monotonic()
+    if _jwks_cache and now - _jwks_cache[0] < _JWKS_TTL_SECONDS:
+        return _jwks_cache[1]
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.get(GOOGLE_JWKS_URI)
+    response.raise_for_status()
+
+    key_set = jwt.PyJWKSet.from_dict(response.json())
+    _jwks_cache = (now, key_set)
+    return key_set
+
+
 async def verify_id_token(id_token: str) -> GoogleIdentity:
     """Validate signature, audience and issuer against Google's JWKS."""
+    try:
+        kid = jwt.get_unverified_header(id_token).get("kid")
+        key_set = await _signing_keys()
+        signing_key = next(
+            (key for key in key_set.keys if key.key_id == kid), None
+        )
+        if signing_key is None:
+            # Google rotates keys; a miss means our cache is stale.
+            _invalidate_signing_keys()
+            key_set = await _signing_keys()
+            signing_key = next(
+                (key for key in key_set.keys if key.key_id == kid), None
+            )
+        if signing_key is None:
+            raise AuthError(f"no Google signing key matches kid={kid}")
 
-    def _verify() -> dict:
-        signing_key = _jwk_client.get_signing_key_from_jwt(id_token)
-        return jwt.decode(
+        claims = jwt.decode(
             id_token,
             signing_key.key,
             algorithms=["RS256"],
@@ -82,11 +119,10 @@ async def verify_id_token(id_token: str) -> GoogleIdentity:
             issuer=list(GOOGLE_ISSUERS),
             options={"require": ["exp", "iat", "sub", "aud", "iss"]},
         )
-
-    try:
-        claims = await asyncio.to_thread(_verify)
+    except AuthError:
+        raise
     except Exception as exc:  # noqa: BLE001 - any failure is a failed sign-in
-        raise AuthError(f"id_token verification failed: {exc}") from exc
+        raise AuthError(f"id_token verification failed: {exc!r}") from exc
 
     if not claims.get("email"):
         raise AuthError("id_token has no email claim")

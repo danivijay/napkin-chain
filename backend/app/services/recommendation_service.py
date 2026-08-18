@@ -8,9 +8,18 @@ from datetime import UTC, datetime, timedelta
 
 from app.models.attempt import ChallengeAttempt
 from app.models.challenge import Challenge
-from app.models.common import AttemptStatus, Difficulty, MasteryStatus
+from app.models.common import AttemptStatus, ConceptArea, Difficulty, MasteryStatus
 from app.models.concept import Concept
 from app.models.progress import ConceptProgress
+
+#: Traffic first: nothing else in a capacity estimate can be derived without it.
+_TEACHING_ORDER = [
+    ConceptArea.traffic,
+    ConceptArea.storage,
+    ConceptArea.bandwidth,
+    ConceptArea.capacity,
+    ConceptArea.assumptions,
+]
 
 WEAK_MASTERY = 0.5
 REVIEW_AFTER_DAYS = 10
@@ -66,8 +75,12 @@ def build_recommendations(
             }
         )
 
-    # 2. Concepts never touched, in the areas the user has already started.
-    untouched = [c for c in concepts if c.concept_id not in progress]
+    # 2. Concepts never touched, offered in teaching order rather than in the
+    #    library's alphabetical grouping.
+    untouched = sorted(
+        (c for c in concepts if c.concept_id not in progress),
+        key=lambda c: (_TEACHING_ORDER.index(c.area), c.order),
+    )
     if untouched and len(recommendations) < limit:
         concept = untouched[0]
         recommendations.append(

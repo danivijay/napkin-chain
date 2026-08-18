@@ -34,6 +34,7 @@ async def get_challenge(slug: str, user: CurrentUser) -> ChallengeDetail:
     challenge = await resolve_or_404(slug)
     attempt = await attempt_service.get_latest_attempt(user.id, challenge.id)
     all_concepts = await challenge_service.list_concepts()
-    concepts = [c for c in all_concepts if c.concept_id in challenge.concept_ids]
+    by_id = {c.concept_id: c for c in all_concepts}
+    concepts = [by_id[cid] for cid in challenge.concept_ids if cid in by_id]
     progress = await progress_service.get_progress_map(user.id)
     return view_service.challenge_detail(challenge, attempt, concepts, progress)

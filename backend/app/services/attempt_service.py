@@ -116,7 +116,8 @@ def display_value(
     if node.type is NodeType.input:
         return node.display_value or humanize(node.value or 0, node.unit)
     if progress.status in RESOLVED_STATUSES and progress.last_estimate is not None:
-        return humanize(progress.last_estimate, node.unit)
+        # No unit here - the node's own label already states it.
+        return humanize(progress.last_estimate)
     return None
 
 

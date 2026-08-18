@@ -21,6 +21,9 @@ async def connect(uri: str | None = None, db_name: str | None = None) -> AsyncIO
         uri or settings.mongodb_uri,
         serverSelectionTimeoutMS=8000,
         uuidRepresentation="standard",
+        # Without this, datetimes come back naive and every client has to
+        # guess that they are UTC. They then guess wrong.
+        tz_aware=True,
     )
     _db = _client[db_name or settings.mongodb_db]
     logger.info("mongodb.connected", extra={"database": _db.name})

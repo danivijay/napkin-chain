@@ -1,0 +1,75 @@
+<!doctype html>
+<!--
+  Source for public/og-image.png, the 1200×630 link preview used by WhatsApp,
+  LinkedIn, Slack, X and friends. Re-render with frontend/brand/render.sh.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Caveat:wght@600&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #fdfdfc; --ink: #141413; --ink2: #5c5c57; --muted: #8a8a82;
+    --line: #e7e6e2; --accent: #5b5bd6; --accent-soft: #eeeefb; --accent-line: #c9c9f2;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: Inter, system-ui, sans-serif; color: var(--ink);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(to right, rgba(20,20,19,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(20,20,19,.045) 1px, transparent 1px);
+    background-size: 30px 30px;
+    padding: 64px 76px; display: flex; flex-direction: column;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+  .brand svg { width: 40px; height: 40px; }
+  .kicker { margin-top: 54px; font-size: 17px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+  h1 { margin-top: 14px; font-size: 84px; line-height: 1; font-weight: 600; letter-spacing: -.04em; }
+  .annotated {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8' preserveAspectRatio='none'%3E%3Cpath d='M2 5.5c22-2.4 46-3.4 74-2.2 16 .7 30 1.9 42 2.4' fill='none' stroke='%235b5bd6' stroke-width='1.6' stroke-linecap='round' opacity='.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: 0 100%; background-size: 100% 14px; padding-bottom: 8px;
+  }
+  .lede { margin-top: 26px; max-width: 760px; font-size: 27px; line-height: 1.4; color: var(--ink2); }
+  .chain { margin-top: auto; display: flex; align-items: center; gap: 0; }
+  .node {
+    background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 20px;
+    box-shadow: 0 1px 3px rgba(20,20,19,.05), 0 10px 26px -18px rgba(20,20,19,.25);
+  }
+  .node .k { font-size: 14px; font-weight: 500; color: var(--muted); }
+  .node .v { margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 25px; font-weight: 600; letter-spacing: -.02em; }
+  .node.hot { background: var(--accent-soft); border-color: var(--accent-line); }
+  .node.hot .v { color: var(--accent); }
+  .arrow { width: 46px; height: 20px; flex: none; }
+  .note { font-family: Caveat, cursive; font-size: 30px; color: var(--accent); margin-left: 18px; transform: rotate(-4deg); white-space: nowrap; }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <svg viewBox="0 0 26 26" fill="none">
+      <rect x="3" y="2.5" width="9" height="6" rx="1.6" stroke="#141413" stroke-width="1.4"/>
+      <rect x="14" y="10" width="9" height="6" rx="1.6" stroke="#141413" stroke-width="1.4"/>
+      <rect x="3" y="17.5" width="9" height="6" rx="1.6" stroke="#141413" stroke-width="1.4"/>
+      <path d="M12 5.6c3.6.2 5.4 1.8 5.8 4.2" stroke="#141413" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M14 13.2c-3.6.2-5.5 1.9-6 4.2" stroke="#141413" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    Napkin Chain
+  </div>
+
+  <p class="kicker">System-design estimation, drilled</p>
+  <h1>Build systems on a <span class="annotated">napkin</span>.</h1>
+  <p class="lede">Size real systems one connected estimate at a time, scored on order of magnitude, not arithmetic.</p>
+
+  <div class="chain">
+    <div class="node"><div class="k">Daily users</div><div class="v">100M</div></div>
+    <svg class="arrow" viewBox="0 0 46 20"><path d="M6 10h30m-7-6 7 6-7 6" fill="none" stroke="#b4b3ab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="node"><div class="k">Requests / day</div><div class="v">1B</div></div>
+    <svg class="arrow" viewBox="0 0 46 20"><path d="M6 10h30m-7-6 7 6-7 6" fill="none" stroke="#b4b3ab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="node"><div class="k">Average QPS</div><div class="v">~12K</div></div>
+    <svg class="arrow" viewBox="0 0 46 20"><path d="M6 10h30m-7-6 7 6-7 6" fill="none" stroke="#b4b3ab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="node hot"><div class="k">Peak QPS</div><div class="v">~36K</div></div>
+    <span class="note">how many servers?</span>
+  </div>
+</body>
+</html>

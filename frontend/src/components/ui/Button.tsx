@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { Spinner } from './Spinner'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'quiet'
 type Size = 'sm' | 'md' | 'lg'
@@ -20,7 +21,9 @@ const SIZES: Record<Size, string> = {
 
 const BASE =
   'inline-flex items-center justify-center gap-2 rounded-md border font-medium ' +
-  'transition-colors duration-150 disabled:opacity-40 disabled:pointer-events-none select-none'
+  'transition-colors duration-150 disabled:opacity-40 disabled:pointer-events-none select-none ' +
+  // A busy button is disabled too, but stays legible: it is working, not unavailable.
+  'disabled:aria-busy:opacity-80'
 
 export function buttonClass(variant: Variant = 'primary', size: Size = 'md', extra = '') {
   return `${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${extra}`
@@ -29,10 +32,30 @@ export function buttonClass(variant: Variant = 'primary', size: Size = 'md', ext
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   size?: Size
+  /** Shows a spinner and blocks repeat clicks while a request is in flight. */
+  loading?: boolean
 }
 
-export function Button({ variant = 'primary', size = 'md', className = '', ...props }: ButtonProps) {
-  return <button className={buttonClass(variant, size, className)} {...props} />
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  className = '',
+  loading = false,
+  disabled,
+  children,
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      className={buttonClass(variant, size, className)}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {loading && <Spinner tone="current" />}
+      {children}
+    </button>
+  )
 }
 
 export function ButtonLink({

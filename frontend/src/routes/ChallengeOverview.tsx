@@ -130,11 +130,21 @@ export function ChallengeOverview() {
       </section>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-line pt-6">
-        <Button size="lg" onClick={() => start.mutate(false)} disabled={start.isPending}>
+        <Button
+          size="lg"
+          onClick={() => start.mutate(false)}
+          disabled={start.isPending}
+          loading={start.isPending && start.variables === false}
+        >
           {inProgress ? 'Resume challenge' : 'Start challenge'}
         </Button>
         {inProgress && (
-          <Button variant="ghost" onClick={() => start.mutate(true)} disabled={start.isPending}>
+          <Button
+            variant="ghost"
+            onClick={() => start.mutate(true)}
+            disabled={start.isPending}
+            loading={start.isPending && start.variables === true}
+          >
             Start over
           </Button>
         )}

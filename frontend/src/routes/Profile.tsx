@@ -46,7 +46,7 @@ export function Profile() {
             size="sm"
             className="mt-3"
             onClick={() => reset.mutate()}
-            disabled={reset.isPending}
+            loading={reset.isPending}
           >
             {reset.isSuccess ? 'Progress reset' : 'Reset my progress'}
           </Button>
@@ -57,6 +57,7 @@ export function Profile() {
         <Button
           variant="ghost"
           onClick={() => logout.mutate(undefined, { onSuccess: () => navigate('/') })}
+          loading={logout.isPending}
         >
           Sign out
         </Button>

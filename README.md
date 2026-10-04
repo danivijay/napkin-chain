@@ -14,6 +14,7 @@
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178c6?style=flat-square&logo=typescript&logoColor=white" />
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Atlas-47a248?style=flat-square&logo=mongodb&logoColor=white" />
   <img alt="AWS Lambda" src="https://img.shields.io/badge/AWS-Lambda%20%2B%20CloudFront-ff9900?style=flat-square&logo=amazonwebservices&logoColor=white" />
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-8a8a82?style=flat-square" /></a>
 </p>
 
 <p>
@@ -263,8 +264,12 @@ database. `GET /health/db` reports database reachability separately.
 - [ ] Move index creation and seeding out of cold start into the deploy step
 - [ ] Shared rate-limit store for multi-instance deployments
 
+## License
+
+Released under the [MIT License](LICENSE).
+
 ---
 
 <div align="center">
-<sub>Built by <a href="https://github.com/danivijay">@danivijay</a></sub>
+<sub>Built by <a href="https://github.com/danivijay">danivijay</a></sub>
 </div>

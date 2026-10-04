@@ -141,7 +141,7 @@ export function EstimatePanel({
             {submitError} Your estimate is still here — try again.
           </p>
         )}
-        <Button type="submit" size="lg" className="w-full" disabled={parsed === null || submitting}>
+        <Button type="submit" size="lg" className="w-full" disabled={parsed === null} loading={submitting}>
           {submitting ? 'Checking…' : 'Submit estimate'}
         </Button>
         <div className="flex items-center justify-between text-sm">

@@ -127,7 +127,7 @@ export function ConceptDetailPage() {
           </>
         ) : (
           <div className="flex flex-wrap items-center gap-3">
-            <Button variant="secondary" onClick={() => learn.mutate()} disabled={learn.isPending}>
+            <Button variant="secondary" onClick={() => learn.mutate()} loading={learn.isPending}>
               {data.learned ? 'Marked as learned' : "I've got this"}
             </Button>
             {data.relatedChallenges[0] && (
@@ -212,7 +212,7 @@ function Drill({
             />
             <span className="text-xs text-ink-muted">{drill.unit}</span>
           </div>
-          <Button type="submit" disabled={parsed === null || practice.isPending}>
+          <Button type="submit" disabled={parsed === null} loading={practice.isPending}>
             Check
           </Button>
         </form>

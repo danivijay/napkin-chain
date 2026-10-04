@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { Wordmark } from '@/components/Logo'
-import { Button, buttonClass } from '@/components/ui/Button'
-import { GoogleGlyph } from './Landing'
-import { api } from '@/lib/api'
+import { GoogleSignInButton } from '@/components/GoogleSignInButton'
+import { Button } from '@/components/ui/Button'
 import { useAuth, useDevLogin } from '@/hooks/useAuth'
 
 const ERRORS: Record<string, string> = {
@@ -47,15 +46,13 @@ export function Login() {
             </p>
           )}
 
-          <a
-            href={api.googleStartUrl(from)}
-            className={buttonClass('primary', 'lg', 'mt-7 w-full')}
-            aria-disabled={!googleEnabled}
-          >
-            <GoogleGlyph /> Continue with Google
-          </a>
+          <GoogleSignInButton
+            redirectTo={from}
+            disabled={!isPending && !googleEnabled}
+            className="mt-7 w-full"
+          />
 
-          {!googleEnabled && (
+          {!isPending && !googleEnabled && (
             <p className="mt-3 text-xs text-ink-muted">
               Google credentials are not configured on this server yet.
             </p>
@@ -80,7 +77,7 @@ export function Login() {
                   className="h-10 flex-1 rounded-md border border-line bg-surface px-3 text-sm outline-none focus:border-accent"
                   aria-label="Development email"
                 />
-                <Button type="submit" variant="secondary" disabled={devLogin.isPending}>
+                <Button type="submit" variant="secondary" loading={devLogin.isPending}>
                   Sign in
                 </Button>
               </div>

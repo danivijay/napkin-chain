@@ -7,6 +7,7 @@ import { Home } from '@/routes/Home'
 import { Landing } from '@/routes/Landing'
 import { LearnLibrary } from '@/routes/LearnLibrary'
 import { Login } from '@/routes/Login'
+import { Privacy } from '@/routes/Privacy'
 import { Profile } from '@/routes/Profile'
 import { ProgressDashboard } from '@/routes/ProgressDashboard'
 import { RequireAuth } from '@/routes/RequireAuth'
@@ -18,6 +19,7 @@ export function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/privacy" element={<Privacy />} />
 
       <Route element={<RequireAuth />}>
         {/* The workspace owns the whole viewport - no app chrome competing with the napkin. */}

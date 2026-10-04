@@ -274,6 +274,9 @@ export function Landing() {
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-5 py-8 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
           <Wordmark className="text-ink-secondary" />
           <p>Built for engineers who would rather be approximately right, fast.</p>
+          <Link to="/privacy" className="hover:text-ink">
+            Privacy
+          </Link>
         </div>
       </footer>
     </div>

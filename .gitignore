@@ -24,3 +24,6 @@ dist/
 
 # Logs
 *.log
+
+# AWS Lambda bundle
+deploy/aws/build/

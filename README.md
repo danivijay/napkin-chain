@@ -171,3 +171,50 @@ Free instances also have no shell, so content is seeded idempotently on startup
 rather than by a manual command.
 
 `.env` is never committed, and no secret is ever stored in the repo.
+
+### AWS (Lambda)
+
+Live at **https://napkinchain.leadbybuild.ing**, costing roughly nothing at
+low traffic: Lambda and CloudFront both sit inside their always-free tiers.
+
+```
+browser ─▶ CloudFront ─▶ Lambda function URL ─▶ uvicorn (FastAPI + SPA)
+          (napkinchain.leadbybuild.ing,          via Lambda Web Adapter
+           caches /assets/*)
+```
+
+Still one origin, for the same cookie reasons as above. The app runs unchanged:
+the [Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter)
+layer starts uvicorn from `deploy/aws/run.sh` and proxies each invocation to it.
+
+| Resource | Value |
+|---|---|
+| Region | `ap-southeast-2` — the only region the account's SCP allows Lambda in |
+| Lambda | `napkin-chain` — python3.13, arm64, 1024 MB, 30 s, layer `LambdaAdapterLayerArm64:27` |
+| IAM role | `napkin-chain-lambda` (basic execution only) |
+| CloudFront | `ECJPW7XFJPAT` (`dcjy5b7f5w160.cloudfront.net`), cert `*.leadbybuild.ing` |
+| DNS | Porkbun `CNAME napkinchain → dcjy5b7f5w160.cloudfront.net` |
+| Logs | `/aws/lambda/napkin-chain`, 14-day retention |
+
+Ship code with:
+
+```bash
+deploy/aws/deploy.sh
+```
+
+It builds the SPA, fetches Linux arm64 wheels (no Docker needed), zips them
+with `backend/app`, and updates the function. Configuration lives in the
+function's environment variables, which the script never touches: change them
+with `aws lambda update-function-configuration`. `FRONTEND_URL` and
+`BACKEND_URL` are set explicitly to the public domain, since there is no
+`RENDER_EXTERNAL_URL` here.
+
+CloudFront forwards every header except `Host` (`AllViewerExceptHostHeader`):
+a function URL rejects requests whose Host is not its own.
+
+Google sign-in uses the **Napkin Chain web** OAuth client in the `napkin-chain`
+Google Cloud project, published to production (basic scopes only, so no
+verification review). Its redirect URI is
+`https://napkinchain.leadbybuild.ing/api/auth/google/callback`, and the consent
+screen links to `/privacy`. Add `http://localhost:8000/api/auth/google/callback`
+to the client if you want real Google sign-in locally.

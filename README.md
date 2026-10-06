@@ -224,6 +224,15 @@ input and feedback panels, and the workspace's fail → learn → retry loop.
 Production runs at **[napkinchain.leadbybuild.ing](https://napkinchain.leadbybuild.ing)**
 on AWS Lambda behind CloudFront.
 
+Every push to `main` deploys automatically. GitHub notifies AWS CodeBuild
+(CloudFormation stack `deploy-napkin-chain`), which pulls the repository through
+an AWS CodeConnections connection and runs `buildspec.yml`: frontend and backend
+tests first (tests marked `db` are skipped), so a failure stops the deploy, then
+`deploy/aws/deploy.sh`. The build role can only update this function's code.
+Build logs are in CloudWatch under `/aws/codebuild/deploy-napkin-chain`.
+
+To deploy by hand instead:
+
 ```bash
 deploy/aws/deploy.sh          # build the SPA, bundle arm64 wheels, update the function
 deploy/aws/deploy.sh --build  # build the bundle only
@@ -242,13 +251,12 @@ authorized redirect URI on a Web OAuth client. Atlas needs network access from
 database credentials.
 
 <details>
-<summary>Alternative: a single container (Render, Fly.io, ECS, …)</summary>
+<summary>Alternative: a single container (Fly.io, ECS, Render, …)</summary>
 
 The root `Dockerfile` builds the SPA with Node 22, then serves it and the API
-from a slim Python 3.13 image running as a non-root user. `render.yaml` deploys
-it as one Render web service. On Render, the public URL is read from
-`RENDER_EXTERNAL_URL` at runtime. Elsewhere, set `FRONTEND_URL` and
-`BACKEND_URL`.
+from a slim Python 3.13 image running as a non-root user. Set `FRONTEND_URL` and
+`BACKEND_URL` to the public URL (on Render, `RENDER_EXTERNAL_URL` is read
+automatically).
 
 </details>
 

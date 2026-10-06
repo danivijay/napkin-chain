@@ -1,0 +1,25 @@
+version: 0.2
+
+# Runs in AWS CodeBuild (CloudFormation stack deploy-napkin-chain, ap-southeast-2) on
+# every push to main. Frontend and backend tests gate the deploy (tests marked `db`
+# need MongoDB and are skipped here); deploy/aws/deploy.sh then builds the Lambda
+# bundle and uploads it. Only the function's code changes: its environment
+# (secrets included) is managed on the function and never touched by a deploy.
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+      python: 3.13
+    commands:
+      - command -v rsync >/dev/null || dnf install -y -q rsync
+      - command -v zip >/dev/null || dnf install -y -q zip
+      - (cd frontend && npm ci --no-audit --no-fund)
+      - python -m pip install --quiet --disable-pip-version-check -r backend/requirements.txt
+  pre_build:
+    commands:
+      - (cd frontend && npm test)
+      - (cd backend && python -m pytest -q -m "not db")
+  build:
+    commands:
+      - echo "Deploying commit $CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - FUNCTION="$FUNCTION_NAME" bash deploy/aws/deploy.sh
